@@ -312,3 +312,9 @@ impl<A: Into<BoltType> + Clone> Into<BoltType> for Vec<A> {
         })
     }
 }
+
+impl Into<BoltType> for BoltMap {
+    fn into(self) -> BoltType {
+        BoltType::Map(self)
+    }
+}
