@@ -14,6 +14,12 @@ impl TryFrom<BoltType> for f64 {
     }
 }
 
+impl Into<BoltType> for f64 {
+    fn into(self) -> BoltType {
+        BoltType::Float(BoltFloat::new(self))
+    }
+}
+
 impl TryFrom<BoltType> for i64 {
     type Error = Error;
 
@@ -280,5 +286,29 @@ impl Into<BoltType> for String {
 impl Into<BoltType> for &str {
     fn into(self) -> BoltType {
         BoltType::String(self.into())
+    }
+}
+
+impl<A: TryFrom<BoltType>> TryFrom<BoltType> for Vec<A> {
+    type Error = Error;
+
+    fn try_from(input: BoltType) -> Result<Vec<A>> {
+        match input {
+            BoltType::List(l) => Ok(l
+                .value
+                .to_vec()
+                .iter()
+                .flat_map(|x| A::try_from(x.clone()))
+                .collect()),
+            _ => Err(Error::ConverstionError),
+        }
+    }
+}
+
+impl<A: Into<BoltType> + Clone> Into<BoltType> for Vec<A> {
+    fn into(self) -> BoltType {
+        BoltType::List(BoltList {
+            value: self.iter().map(|v| v.clone().into()).collect(),
+        })
     }
 }
